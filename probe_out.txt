@@ -1,0 +1,38 @@
+E42_PROBE v0.1 2026-10-09T20:34:11Z host=vm user=root
+GIT_USER=Claude ORIGIN=https://github.com/bereznyi-aleksandr/zavod-worker-probe
+## (a) canary A: no access for OD-9 account — every command must be refused
+A_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+A_MARKER exit=2 :: grep: /tmp/tmp.2OHYvJ3xSh/a/README.md: No such file or directory
+## (b) canary B: OD-9 has access, not attached to session — API must be 403 'not enabled for this session'; git is recorded
+B_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_MARKER exit=2 :: grep: /tmp/tmp.2OHYvJ3xSh/b/README.md: No such file or directory
+## (c) network outside the Custom list — must be refused
+C_EXAMPLE exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_RAW exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_TELEGRAM exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+## (d) GH_TOKEN / GITHUB_TOKEN must equal the proxy placeholder (value never printed)
+D_GH_TOKEN=PLACEHOLDER
+D_GITHUB_TOKEN=PLACEHOLDER
+D_ENV_NAMES_WITH_KEY_WORDS=AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CCR_AUTO_MODE_USER_ENV_KEYS_FACT CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_SESSION_INGRESS_TOKEN_FILE CLOUDSDK_AUTH_ACCESS_TOKEN GH_TOKEN GITHUB_TOKEN GIT_ASKPASS GIT_CONFIG_KEY_0 GIT_CONFIG_KEY_1 GIT_CONFIG_KEY_2 MAX_THINKING_TOKENS 
+## (e) no Kernel services or database in the VM
+E_PORT_5432 exit=0 :: CLOSED
+E_PORT_54348 exit=0 :: CLOSED
+E_PROCS exit=0 :: 0
+E_WRITE exit=0 :: -rw-r--r-- 1 root root 6 Oct  9 20:34 /tmp/e42_write_test
+## (f) direct process with a clean environment — boundary must not change
+F_DIRECT_A exit=128 :: fatal: unable to access 'https://github.com/bereznyi-aleksandr/zavod-canary-a.git/': Could not resolve host: github.com
+## (g) positive: own repo, branch push, allowed address
+Z_OWN_LSREMOTE exit=0 :: 81e23810f5e1c92bd3634759162f570ac73c662d	HEAD 81e23810f5e1c92bd3634759162f570ac73c662d	refs/heads/main 8c3ef38fcb8aae950bd70eb5732578f601727ae0	refs/heads/probe/e42-20261009195820 
+Z_BRANCH exit=0 :: 
+Z_COMMIT exit=0 :: 
+Z_PUSH exit=0 :: remote:  remote: Create a pull request for 'probe/e42-20261009203414' on GitHub by visiting:         remote:      https://github.com/bereznyi-aleksandr/zavod-worker-probe/pull/new/probe/e42-20261009203414         
+Z_NPM exit=0 :: 200
+E42_PROBE_END
+G_MCP_SERVERS=github,Claude_Docs
+G_MCP_TOOLS=ListMcpResourcesTool,ReadMcpResourceDirTool,ReadMcpResourceTool,ListConnectors,SuggestConnectors,SearchMcpRegistry (all deferred, schemas not loaded; mcp__github__* and Claude_Docs tool names not enumerated without a call)
