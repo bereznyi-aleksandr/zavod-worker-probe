@@ -1,0 +1,37 @@
+E42_PROBE v0.1 2026-10-09T19:58:17Z host=vm user=root
+GIT_USER=Claude ORIGIN=https://github.com/bereznyi-aleksandr/zavod-worker-probe
+## (a) canary A: no access for OD-9 account — every command must be refused
+A_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+A_MARKER exit=2 :: grep: /tmp/tmp.6zND98rjcE/a/README.md: No such file or directory
+## (b) canary B: OD-9 has access, not attached to session — API must be 403 'not enabled for this session'; git is recorded
+B_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_MARKER exit=2 :: grep: /tmp/tmp.6zND98rjcE/b/README.md: No such file or directory
+## (c) network outside the Custom list — must be refused
+C_EXAMPLE exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_RAW exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_TELEGRAM exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+## (d) GH_TOKEN / GITHUB_TOKEN must equal the proxy placeholder (value never printed)
+D_GH_TOKEN=PLACEHOLDER
+D_GITHUB_TOKEN=PLACEHOLDER
+D_ENV_NAMES_WITH_KEY_WORDS=AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CCR_AUTO_MODE_USER_ENV_KEYS_FACT CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_SESSION_INGRESS_TOKEN_FILE CLOUDSDK_AUTH_ACCESS_TOKEN GH_TOKEN GITHUB_TOKEN GIT_ASKPASS GIT_CONFIG_KEY_0 GIT_CONFIG_KEY_1 GIT_CONFIG_KEY_2 MAX_THINKING_TOKENS 
+## (e) no Kernel services or database in the VM
+E_PORT_5432 exit=0 :: CLOSED
+E_PORT_54348 exit=0 :: CLOSED
+E_PROCS exit=0 :: 0
+E_WRITE exit=0 :: -rw-r--r-- 1 root root 6 Oct  9 19:58 /tmp/e42_write_test
+## (f) direct process with a clean environment — boundary must not change
+F_DIRECT_A exit=128 :: fatal: unable to access 'https://github.com/bereznyi-aleksandr/zavod-canary-a.git/': Could not resolve host: github.com
+## (g) positive: own repo, branch push, allowed address
+Z_OWN_LSREMOTE exit=0 :: cd05fd517df75e991f647371c9e18c9c92dbd604	HEAD cd05fd517df75e991f647371c9e18c9c92dbd604	refs/heads/main
+Z_BRANCH exit=0 :: 
+Z_COMMIT exit=0 :: 
+Z_PUSH exit=0 :: remote:  remote: Create a pull request for 'probe/e42-20261009195820' on GitHub by visiting:         remote:      https://github.com/bereznyi-aleksandr/zavod-worker-probe/pull/new/probe/e42-20261009195820         
+Z_NPM exit=0 :: 200
+E42_PROBE_END
+G_MCP_TOOLS=servers[Claude_Docs,github,Gmail,Google_Drive,claude-code-remote] tools[mcp__Claude_Docs__batch,mcp__Claude_Docs__guide,mcp__Claude_Docs__update,mcp__Claude_Docs__create,mcp__Claude_Docs__delete,mcp__Claude_Docs__export,mcp__Claude_Docs__query,mcp__Claude_Docs__read,mcp__Gmail__apply_sensitive_message_label,mcp__Gmail__apply_sensitive_thread_label,mcp__Gmail__create_draft,mcp__Gmail__create_label,mcp__Gmail__delete_draft,mcp__Gmail__delete_label,mcp__Gmail__forward,mcp__Gmail__get_draft,mcp__Gmail__get_message,mcp__Gmail__get_thread,mcp__Gmail__label_message,mcp__Gmail__label_thread,mcp__Gmail__list_drafts,mcp__Gmail__list_labels,mcp__Gmail__mark_message_spam,mcp__Gmail__mark_thread_spam,mcp__Gmail__reply,mcp__Gmail__search_threads,mcp__Gmail__send_message,mcp__Gmail__trash_message,mcp__Gmail__trash_thread,mcp__Gmail__unlabel_message,mcp__Gmail__unlabel_thread,mcp__Gmail__unmark_message_spam,mcp__Gmail__unmark_thread_spam,mcp__Gmail__untrash_message,mcp__Gmail__untrash_thread,mcp__Gmail__update_draft,mcp__Gmail__update_label,mcp__Gmail__update_message_labels,mcp__Google_Drive__copy_file,mcp__Google_Drive__create_file,mcp__Google_Drive__download_file_content,mcp__Google_Drive__get_file_metadata,mcp__Google_Drive__get_file_permissions,mcp__Google_Drive__list_recent_files,mcp__Google_Drive__read_file_content,mcp__Google_Drive__search_files,mcp__Google_Drive__share_file,mcp__Google_Drive__trash_file,mcp__Google_Drive__update_file,mcp__github__actions_get,mcp__github__actions_list,mcp__github__actions_run_trigger,mcp__github__add_comment_to_pending_review,mcp__github__add_issue_comment,mcp__github__add_reply_to_pull_request_comment,mcp__github__create_branch,mcp__github__create_or_update_file,mcp__github__create_pull_request,mcp__github__create_repository,mcp__github__delete_file,mcp__github__disable_pr_auto_merge,mcp__github__enable_pr_auto_merge,mcp__github__fork_repository,mcp__github__get_check_run,mcp__github__get_commit,mcp__github__get_file_contents,mcp__github__get_job_logs,mcp__github__get_label,mcp__github__get_latest_release,mcp__github__get_me,mcp__github__get_release_by_tag,mcp__github__get_tag,mcp__github__get_team_members,mcp__github__get_teams,mcp__github__issue_read,mcp__github__issue_write,mcp__github__list_branches,mcp__github__list_commits,mcp__github__list_issue_fields,mcp__github__list_issue_types,mcp__github__list_issues,mcp__github__list_pull_requests,mcp__github__list_releases,mcp__github__list_repository_collaborators,mcp__github__list_tags,mcp__github__merge_pull_request,mcp__github__pull_request_read,mcp__github__pull_request_review_write,mcp__github__push_files,mcp__github__request_copilot_review,mcp__github__resolve_review_thread,mcp__github__run_secret_scanning,mcp__github__search_code,mcp__github__search_commits,mcp__github__search_issues,mcp__github__search_pull_requests,mcp__github__search_repositories,mcp__github__search_users,mcp__github__sub_issue_write,mcp__github__unresolve_review_thread,mcp__github__update_issue_comment,mcp__github__update_pull_request,mcp__github__update_pull_request_branch,mcp__claude-code-remote__add_repo,mcp__claude-code-remote__archive_session,mcp__claude-code-remote__create_session,mcp__claude-code-remote__create_trigger,mcp__claude-code-remote__delete_trigger,mcp__claude-code-remote__fire_trigger,mcp__claude-code-remote__get_event,mcp__claude-code-remote__get_session,mcp__claude-code-remote__get_trigger,mcp__claude-code-remote__interrupt_session,mcp__claude-code-remote__list_environments,mcp__claude-code-remote__list_events,mcp__claude-code-remote__list_repos,mcp__claude-code-remote__list_sessions,mcp__claude-code-remote__list_triggers,mcp__claude-code-remote__read_documentation,mcp__claude-code-remote__register_repo_root,mcp__claude-code-remote__send_later,mcp__claude-code-remote__send_message,mcp__claude-code-remote__set_session_tags,mcp__claude-code-remote__set_session_title,mcp__claude-code-remote__subscribe_pr_activity,mcp__claude-code-remote__unarchive_session,mcp__claude-code-remote__unsubscribe_pr_activity,mcp__claude-code-remote__unwatch_url,mcp__claude-code-remote__update_trigger,mcp__claude-code-remote__watch_url]
