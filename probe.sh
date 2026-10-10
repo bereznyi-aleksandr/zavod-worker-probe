@@ -1,5 +1,6 @@
 #!/bin/bash
-# ДОКУМЕНТ: probe.sh  ВЕРСИЯ: v0.1  СТАТУС: CANDIDATE
+# ДОКУМЕНТ: probe.sh  ВЕРСИЯ: v0.2  СТАТУС: CANDIDATE
+# ДАТА ОБНОВЛЕНИЯ: 2026-10-10 07:58 +03:00 (v0.2: (b2) репо с правами OD-9, но не прикреплённое; (h) отпечаток settings.json — аудит ChatGPT раунд 3)
 # ДАТА СОЗДАНИЯ: 2026-10-09 22:15 +03:00  ИСПОЛНИТЕЛЬ: Claude (сессия fd43469f-418c-4f8b-b94b-32cc0b8d4acf)
 # НАЗНАЧЕНИЕ: пробы E4-2 (а)–(з) протокола Z1 v1.9 в облачной сессии рабочего. Печатает только коды и
 #   первые строки ответов; значения переменных с ключами не печатает (только «заглушка / нет / другое, длина»).
@@ -9,7 +10,7 @@ O=bereznyi-aleksandr
 T=$(mktemp -d)
 r() { local name=$1; shift; local out; out=$("$@" 2>&1); local rc=$?
   echo "$name exit=$rc :: $(printf '%s' "$out" | head -3 | tr '\n' ' ' | cut -c1-300)"; }
-echo "E42_PROBE v0.1 $(date -u +%FT%TZ) host=$(hostname) user=$(id -un)"
+echo "E42_PROBE v0.2 $(date -u +%FT%TZ) host=$(hostname) user=$(id -un)"
 echo "GIT_USER=$(git config --get user.name 2>/dev/null) ORIGIN=$(git remote get-url origin 2>/dev/null)"
 
 echo "## (a) canary A: no access for OD-9 account — every command must be refused"
@@ -25,6 +26,10 @@ r B_LSREMOTE git ls-remote https://github.com/$O/zavod-canary-b.git
 r B_CLONE git clone -q https://github.com/$O/zavod-canary-b.git "$T/b"
 r B_FETCH git fetch -q https://github.com/$O/zavod-canary-b.git main
 r B_MARKER grep -h MARKER "$T/b/README.md"
+
+echo "## (b2) zavod-p1-bot: OD-9 HAS write, repo NOT attached to session — API must be 403 not enabled for this session"
+r B2_API gh api repos/$O/zavod-p1-bot --jq .full_name
+r B2_LSREMOTE git ls-remote https://github.com/$O/zavod-p1-bot.git
 
 echo "## (c) network outside the Custom list — must be refused"
 r C_EXAMPLE curl -sS -m 10 -o /dev/null -w "%{http_code}" https://example.com/
@@ -54,4 +59,6 @@ git add probe_branch.txt
 r Z_COMMIT git -c user.name=zavod-probe -c user.email=probe@invalid commit -q -m "E4-2 positive push probe"
 r Z_PUSH git push -q -u origin "$BR"
 r Z_NPM curl -sS -m 10 -o /dev/null -w "%{http_code}" https://registry.npmjs.org/grammy
+echo "## (h) policy file fingerprint as seen inside the session"
+r H_SETTINGS_SHA sha256sum .claude/settings.json
 echo "E42_PROBE_END"
