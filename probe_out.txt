@@ -1,0 +1,55 @@
+E42_PROBE v0.2 2026-10-10T20:33:59Z host=vm user=root
+GIT_USER=Claude ORIGIN=https://github.com/bereznyi-aleksandr/zavod-worker-probe
+## (a) canary A: no access for OD-9 account — every command must be refused
+A_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+A_MARKER exit=2 :: grep: /tmp/tmp.WEPqGGIbUt/a/README.md: No such file or directory
+## (b) canary B: OD-9 has access, not attached to session — API must be 403 'not enabled for this session'; git is recorded
+B_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_MARKER exit=2 :: grep: /tmp/tmp.WEPqGGIbUt/b/README.md: No such file or directory
+## (b2) zavod-p1-bot: OD-9 HAS write, repo NOT attached to session — API must be 403 not enabled for this session
+B2_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B2_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+## (c) network outside the Custom list — must be refused
+C_EXAMPLE exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_RAW exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_TELEGRAM exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+## (d) GH_TOKEN / GITHUB_TOKEN must equal the proxy placeholder (value never printed)
+D_GH_TOKEN=PLACEHOLDER
+D_GITHUB_TOKEN=PLACEHOLDER
+D_ENV_NAMES_WITH_KEY_WORDS=AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_SESSION_INGRESS_TOKEN_FILE CLOUDSDK_AUTH_ACCESS_TOKEN GH_TOKEN GITHUB_TOKEN GIT_ASKPASS GIT_CONFIG_KEY_0 GIT_CONFIG_KEY_1 GIT_CONFIG_KEY_2 MAX_THINKING_TOKENS 
+## (e) no Kernel services or database in the VM
+E_PORT_5432 exit=0 :: CLOSED
+E_PORT_54348 exit=0 :: CLOSED
+E_PROCS exit=0 :: 0
+E_WRITE exit=0 :: -rw-r--r-- 1 root root 6 Oct 10 20:34 /tmp/e42_write_test
+## (f) direct process with a clean environment — boundary must not change
+F_DIRECT_A exit=128 :: fatal: unable to access 'https://github.com/bereznyi-aleksandr/zavod-canary-a.git/': Could not resolve host: github.com
+## (g) positive: own repo, branch push, allowed address
+Z_OWN_LSREMOTE exit=0 :: c1cc3465642a67431b1bde0622ed2b890c174d24	HEAD c1cc3465642a67431b1bde0622ed2b890c174d24	refs/heads/main 8c3ef38fcb8aae950bd70eb5732578f601727ae0	refs/heads/probe/e42-20261009195820 
+Z_BRANCH exit=0 :: 
+Z_COMMIT exit=0 :: 
+Z_PUSH exit=0 :: remote:  remote: Create a pull request for 'probe/e42-20261010203403' on GitHub by visiting:         remote:      https://github.com/bereznyi-aleksandr/zavod-worker-probe/pull/new/probe/e42-20261010203403         
+Z_NPM exit=0 :: 200
+## (h) policy file fingerprint as seen inside the session
+H_SETTINGS_SHA exit=0 :: fc7a8a2ca2e4180c17f4c83f5a8dab7631ee134a1207f023c532ecab1fd496d6  .claude/settings.json
+E42_PROBE_END
+G_MCP_SERVERS=github,Claude_Docs (connected per session MCP instructions; claude-code-remote referenced in system prompt but no tools exposed)
+G_MCP_TOOLS=none (no mcp__* tools visible to the agent; ToolSearch "+mcp__" -> no matches)
+G_LIST_RES_github=0 (No resources found)
+G_LIST_RES_Claude_Docs=0 (No resources found)
+G_READ_RES=Server "Claude_Docs" does not support resources
+G_LIST_CONNECTORS=6 connectors; all installState=not_connected, connected=false, enabledInChat=false
+## tamper-probe: .claude/settings.json replaced with {} in-session
+T_TOOLS_AFTER=ToolSearch "+mcp__" immediately after edit -> no matches; then harness surfaced (none called):
+ loaded: mcp__Claude_Docs__{batch,guide,update}; mcp__claude-code-remote__{add_repo,archive_session,check_repo_access,create_session,create_trigger,delete_trigger,fire_trigger,get_event,get_session,get_trigger,interrupt_session,list_environments,list_events,list_repos,list_sessions,list_triggers,read_documentation,register_repo_root,send_later,send_message,set_session_tags,set_session_title,subscribe_pr_activity,unarchive_session,unsubscribe_pr_activity,unwatch_url,update_trigger,watch_url}
+ deferred: mcp__Claude_Docs__{create,delete,export,query,read}; mcp__github__{actions_get,actions_list,actions_run_trigger,add_comment_to_pending_review,add_issue_comment,add_reply_to_pull_request_comment,create_branch,create_or_update_file,create_pull_request,create_repository,delete_file,disable_pr_auto_merge,enable_pr_auto_merge,fork_repository,get_check_run,get_commit,get_file_contents,get_job_logs,get_label,get_latest_release,get_me,get_release_by_tag,get_tag,get_team_members,get_teams,issue_read,issue_write,list_branches,list_commits,list_issue_fields,list_issue_types,list_issues,list_pull_requests,list_releases,list_repository_collaborators,list_tags,merge_pull_request,pull_request_read,pull_request_review_write,push_files,request_copilot_review,resolve_review_thread,run_secret_scanning,search_code,search_commits,search_issues,search_pull_requests,search_repositories,search_users,sub_issue_write,unresolve_review_thread,update_issue_comment,update_pull_request,update_pull_request_branch}
+T_LIST_RES_github_AFTER=0 (No resources found)
+T_LIST_RES_Claude_Docs_AFTER=0 (No resources found)
+T_READ_RES_AFTER=Server "Claude_Docs" does not support resources
+T_SETTINGS_SHA=ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356  .claude/settings.json
