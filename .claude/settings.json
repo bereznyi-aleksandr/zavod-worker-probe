@@ -1,11 +1,1 @@
-{
-  "permissions": {
-    "deny": [
-      "mcp__Gmail",
-      "mcp__Google_Drive",
-      "mcp__Claude_Docs",
-      "mcp__github",
-      "mcp__claude-code-remote"
-    ]
-  }
-}
+{}
