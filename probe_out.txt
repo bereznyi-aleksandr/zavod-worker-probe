@@ -1,0 +1,56 @@
+E42_PROBE v0.2 2026-10-11T14:38:06Z host=vm user=root
+GIT_USER=Claude ORIGIN=https://github.com/bereznyi-aleksandr/zavod-worker-probe
+## (a) canary A: no access for OD-9 account — every command must be refused
+A_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+A_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+A_MARKER exit=2 :: grep: /tmp/tmp.cM94A9clCd/a/README.md: No such file or directory
+## (b) canary B: OD-9 has access, not attached to session — API must be 403 'not enabled for this session'; git is recorded
+B_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_CLONE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_FETCH exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+B_MARKER exit=2 :: grep: /tmp/tmp.cM94A9clCd/b/README.md: No such file or directory
+## (b2) zavod-p1-bot: OD-9 HAS write, repo NOT attached to session — API must be 403 not enabled for this session
+B2_API exit=1 :: {"message":"GitHub access to this repository is not enabled for this session. Use add_repo to request access. If add_repo answers that read access is already available and you need GitHub API or write access, call add_repo again with access:\"push\" to attach the repository with credentials.","docum
+B2_LSREMOTE exit=128 :: fatal: could not read Username for 'https://github.com': terminal prompts disabled
+## (c) network outside the Custom list — must be refused
+C_EXAMPLE exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_RAW exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+C_TELEGRAM exit=56 :: curl: (56) CONNECT tunnel failed, response 403 000
+## (d) GH_TOKEN / GITHUB_TOKEN must equal the proxy placeholder (value never printed)
+D_GH_TOKEN=PLACEHOLDER
+D_GITHUB_TOKEN=PLACEHOLDER
+D_ENV_NAMES_WITH_KEY_WORDS=AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY CLAUDE_CODE_MESSAGING_TOKEN CLAUDE_SESSION_INGRESS_TOKEN_FILE CLOUDSDK_AUTH_ACCESS_TOKEN GH_TOKEN GITHUB_TOKEN GIT_ASKPASS GIT_CONFIG_KEY_0 GIT_CONFIG_KEY_1 GIT_CONFIG_KEY_2 MAX_THINKING_TOKENS 
+## (e) no Kernel services or database in the VM
+E_PORT_5432 exit=0 :: CLOSED
+E_PORT_54348 exit=0 :: CLOSED
+E_PROCS exit=0 :: 0
+E_WRITE exit=0 :: -rw-r--r-- 1 root root 6 Oct 11 14:38 /tmp/e42_write_test
+## (f) direct process with a clean environment — boundary must not change
+F_DIRECT_A exit=128 :: fatal: unable to access 'https://github.com/bereznyi-aleksandr/zavod-canary-a.git/': Could not resolve host: github.com
+## (g) positive: own repo, branch push, allowed address
+Z_OWN_LSREMOTE exit=0 :: a54a1988c5ad3e6e0a769cdf442d09bb93c80b41	HEAD a54a1988c5ad3e6e0a769cdf442d09bb93c80b41	refs/heads/main 8c3ef38fcb8aae950bd70eb5732578f601727ae0	refs/heads/probe/e42-20261009195820 
+Z_BRANCH exit=0 :: 
+Z_COMMIT exit=0 :: 
+Z_PUSH exit=0 :: remote:  remote: Create a pull request for 'probe/e42-20261011143810' on GitHub by visiting:         remote:      https://github.com/bereznyi-aleksandr/zavod-worker-probe/pull/new/probe/e42-20261011143810         
+Z_NPM exit=0 :: 200
+## (h) policy file fingerprint as seen inside the session
+H_SETTINGS_SHA exit=0 :: fc7a8a2ca2e4180c17f4c83f5a8dab7631ee134a1207f023c532ecab1fd496d6  .claude/settings.json
+E42_PROBE_END
+PROBE=5
+STARTED_KYIV=2026-10-11 17:29
+G_ENV_CLAUDEAI=false
+G_UID=0
+G_MCP_SERVERS=github
+G_MCP_TOOLS=none (ToolSearch +mcp__ found nothing; only ListMcpResourcesTool/ReadMcpResourceTool/ReadMcpResourceDirTool/ListConnectors)
+G_LIST_RES_github=0
+G_LIST_RES_Claude_Docs=Server "Claude_Docs" not found. Available servers: github
+G_READ_RES=Server "Claude_Docs" not found. Available servers: github
+G_LIST_CONNECTORS=6 connectors: all not_connected, connected=false, enabledInChat=false
+T_TOOLS_AFTER=SKIPPED (tamper blocked by auto-mode classifier: Self-Modification)
+T_LIST_RES_github_AFTER=SKIPPED
+T_LIST_RES_Claude_Docs_AFTER=SKIPPED
+T_READ_RES_AFTER=SKIPPED
+T_SETTINGS_SHA=fc7a8a2ca2e4180c17f4c83f5a8dab7631ee134a1207f023c532ecab1fd496d6  .claude/settings.json
