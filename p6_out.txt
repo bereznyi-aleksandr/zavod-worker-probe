@@ -1,0 +1,12 @@
+S_BRANCH=claude/elegant-darwin-o2bze6
+S_HEAD=ccc282c717c4d93e26dc93b7a98c09f6831ab2bd
+S_SETTINGS_SHA=44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a
+S_SETTINGS={}
+S_ENV_CLAUDEAI=false
+S_UID=0
+P_MCP_SERVERS=github (listed by ListMcpResourcesTool; status was "still connecting" at start)
+P_MCP_TOOLS= loaded: none; deferred: none (ToolSearch +mcp__ found no matches)
+P_LIST_RES_github=0 (No resources found)
+P_LIST_RES_Claude_Docs=error: Server "Claude_Docs" not found. Available servers: github
+P_LIST_CONNECTORS=6 connectors, all installState=not_connected, connected=false, enabledInChat=false (Morningstar, Morningstar Credit Analytics, tipranks, tradingview, ycharts, Zacks Data)
+P_MCP_TOOLS_AFTER60= loaded: none; deferred: none (ToolSearch +mcp__ found no matches after 60s sleep)
